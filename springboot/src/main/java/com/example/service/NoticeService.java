@@ -1,5 +1,6 @@
 package com.example.service;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.example.entity.Notice;
 import com.example.exception.CustomException;
@@ -24,6 +25,7 @@ public class NoticeService {
      * 新增
      */
     public void add(Notice notice) {
+        notice.setTime(DateUtil.now()); //creat time
         noticeMapper.insert(notice);
     }
 
