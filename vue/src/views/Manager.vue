@@ -25,10 +25,14 @@
             <el-icon><HomeFilled /></el-icon>
             <span>HomePage</span>
           </el-menu-item>
+          <el-menu-item index="/notice">
+            <el-icon><Bell /></el-icon>
+            <span>Announce Mgmt</span>
+          </el-menu-item>
           <el-sub-menu index="2">
             <template #title>
               <el-icon><Memo /></el-icon>
-              <span>UserManagement</span>
+              <span>User Mgmt</span>
             </template>
             <el-menu-item index="/admin">
               <el-icon><User /></el-icon>
