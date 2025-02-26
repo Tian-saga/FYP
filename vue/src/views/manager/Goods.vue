@@ -66,7 +66,14 @@
           <el-input v-model="data.form.store" autocomplete="off" />
         </el-form-item>
         <el-form-item label="classify" prop="categoryId">
-          <el-input v-model="data.form.categoryId" autocomplete="off" />
+          <el-select v-model="data.form.categoryId" placeholder="Please select a category" style="width: 100%">
+            <el-option
+                v-for="item in data.categoryList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+            />
+          </el-select>
         </el-form-item>
 
       </el-form>
@@ -96,7 +103,12 @@ const data = reactive({
   formVisible: false,
   form: {},
   tableData: [],
-  name: null
+  name: null,
+  categoryList: []
+})
+//获取分类数据
+request.get('/category/selectAll').then(res =>{
+  data.categoryList =res.data
 })
 
 // 分页查询
