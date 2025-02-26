@@ -34,6 +34,10 @@
               <el-icon><Menu /></el-icon>
               <span>Classified Mgmt</span>
             </el-menu-item>
+            <el-menu-item index="/goods">
+              <el-icon><Goods /></el-icon>
+              <span>ProductInfo</span>
+            </el-menu-item>
           </el-sub-menu>
           <el-menu-item index="/notice">
             <el-icon><Bell /></el-icon>
