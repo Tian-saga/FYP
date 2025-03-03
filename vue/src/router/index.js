@@ -15,6 +15,7 @@ const router = createRouter({
         { path: 'notice', component: () => import('@/views/manager/Notice.vue')},
         { path: 'category', component: () => import('@/views/manager/Category.vue')},
         { path: 'goods', component: () => import('@/views/manager/Goods.vue')},
+        { path: 'goodsStock', component: () => import('@/views/manager/GoodsStock.vue')},
       ]
     },
     { path: '/login', component: () => import('@/views/Login.vue')},
