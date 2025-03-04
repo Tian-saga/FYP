@@ -27,7 +27,7 @@ public class AdminService {
     public void add(Admin admin) {
         Admin dbAdmin = adminMapper.selectByUsername(admin.getUsername());
         if (ObjectUtil.isNotNull(dbAdmin)) {
-            throw new CustomException("User does not exist");
+            throw new CustomException("User has existed");
         }
         if (ObjectUtil.isEmpty(admin.getPassword())) {
             admin.setPassword("admin");

@@ -56,6 +56,10 @@
               <el-icon><User /></el-icon>
               <span>AdminInfo</span>
             </el-menu-item>
+            <el-menu-item index="/user">
+              <el-icon><User /></el-icon>
+              <span>UserInfo</span>
+            </el-menu-item>
           </el-sub-menu>
           <el-menu-item index="/person">
             <el-icon><User /></el-icon>
