@@ -29,7 +29,7 @@
         <el-table-column label="email" prop="email"></el-table-column>
         <el-table-column label="operate" header-align="center" width="160">
           <template #default="scope">
-            <el-button type="primary" @click="handleEdit(scope.row)">edit</el-button>
+            <el-button style="background-color: green" type="primary" @click="handleEdit(scope.row)">edit</el-button>
             <el-button type="danger" @click="handleDelete(scope.row.id)">delete</el-button>
           </template>
         </el-table-column>

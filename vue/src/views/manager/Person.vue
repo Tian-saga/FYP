@@ -14,6 +14,20 @@
         <el-form-item label="Name">
           <el-input v-model="data.user.name" autocomplete="off" />
         </el-form-item>
+        <div v-if="data.user.role ==='USER'">
+          <el-form-item label="sex" prop="sex">
+            <el-radio-group v-model="data.user.sex">
+              <el-radio label="male"></el-radio>
+              <el-radio label="female"></el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="phone" prop="phone">
+            <el-input v-model="data.user.phone" autocomplete="off" />
+          </el-form-item>
+          <el-form-item label="email" prop="email">
+            <el-input v-model="data.user.email" autocomplete="off" />
+          </el-form-item>
+        </div>
         <div style="text-align: center">
           <el-button type="primary" @click="save">Save</el-button>
         </div>
@@ -43,6 +57,17 @@ const emit = defineEmits(["updateUser"])
 const save = () => {
   if (data.user.role === 'ADMIN') {
     request.put('/admin/update', data.user).then(res => {
+      if (res.code === '200') {
+        ElMessage.success('Update Successfully')
+        //把更新后的用户信息存储到缓存
+        localStorage.setItem('system-user', JSON.stringify(data.user))
+        emit('updateUser')
+      } else {
+        ElMessage.error(res.msg)
+      }
+    })
+  }else {
+    request.put('/user/update', data.user).then(res => {
       if (res.code === '200') {
         ElMessage.success('Update Successfully')
         //把更新后的用户信息存储到缓存

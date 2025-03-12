@@ -39,7 +39,7 @@ const save = () => {
     if (res.code === '200') {
       ElMessage.success('Change password successfully')
       //把更新后的用户信息存储到缓存
-      localStorage.setItem('system-user', JSON.stringify(data.user))
+      localStorage.removeItem('system-user')
       router.push('/login')
     } else {
       ElMessage.error(res.msg)

@@ -105,4 +105,8 @@ public class UserService {
         userMapper.updateById(dbUser);
     }
 
+    //register
+    public void register(User user) {
+        this.add(user);
+    }
 }

@@ -4,7 +4,7 @@
       <div style="flex: 1">
         <div style="padding-left: 20px; display: flex; align-items: center">
           <img src="@/assets/imgs/logo.png" alt="" style="width: 40px">
-          <div style="font-weight: bold; font-size: 24px; margin-left: 5px">Management System</div>
+          <div style="font-weight: bold; font-size: 24px; margin-left: 5px; color: #39bf23">Agricultural Product Sales System</div>
         </div>
       </div>
       <div style="width: fit-content; padding-right: 10px; display: flex; align-items: center;">
@@ -25,7 +25,7 @@
             <el-icon><HomeFilled /></el-icon>
             <span>HomePage</span>
           </el-menu-item>
-          <el-sub-menu index="1">
+          <el-sub-menu index="1" v-if="data.user.role === 'ADMIN'">
             <template #title>
               <el-icon><Menu /></el-icon>
               <span>Product Mgmt</span>
@@ -43,11 +43,11 @@
               <span>Purchase Mgmt</span>
             </el-menu-item>
           </el-sub-menu>
-          <el-menu-item index="/notice">
+          <el-menu-item index="/notice" v-if="data.user.role === 'ADMIN'">
             <el-icon><Bell /></el-icon>
             <span>Announce Mgmt</span>
           </el-menu-item>
-          <el-sub-menu index="2">
+          <el-sub-menu index="2" v-if="data.user.role === 'ADMIN'">
             <template #title>
               <el-icon><Memo /></el-icon>
               <span>User Mgmt</span>

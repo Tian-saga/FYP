@@ -12,6 +12,7 @@
         <el-form-item prop="role">
           <el-select size="large" style="width: 100%" v-model="data.form.role">
             <el-option value="ADMIN" label="administrator"></el-option>
+            <el-option value="USER" label="user"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -76,7 +77,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(to top, #7f7fd5, #86a8e7, #91eae4);
+  background-image: url("@/assets/imgs/bg.png");
   background-size: cover;
 }
 .login-box {

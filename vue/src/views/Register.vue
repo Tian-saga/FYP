@@ -1,4 +1,4 @@
-<template>
+ <template>
   <div class="login-container">
     <div class="login-box">
       <div style="font-weight: bold; font-size: 24px; text-align: center; margin-bottom: 30px; color: #1450aa">Welcome</div>
@@ -87,7 +87,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(to bottom, #a8c0ff, #3f2b96);
+  background-image: url("@/assets/imgs/bg.png");
   background-size: cover;
 }
 .login-box {
