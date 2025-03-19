@@ -1,9 +1,50 @@
 
 <template>
   <div>
-  <div class="card"></div>
-  <el-button v-for="item in data.categoryList" :key="item.id">{{item.name}}</el-button>
+  <div class="card" style="margin-bottom: 10px">
+    <el-button :class="{'active': data.activeCategoryId === null}" @click="loadCategoryGoods(null)">Display All</el-button>
+    <el-button :class="{'active': data.activeCategoryId === item.id}" @click="loadCategoryGoods(item.id)" v-for="item in data.categoryList" :key="item.id">{{item.name}}</el-button>
   </div>
+ <div style="margin-bottom: 10px">
+    <el-input size="large" style="width: 300px;margin-right: 5px" v-model="data.name" placeholder="Please enter a keyword to search"></el-input>
+    <el-button type="primary">Search</el-button>
+ </div>
+
+    <el-row :gutter="10" v-if="data.total > 0">
+        <el-col style="margin-bottom: 10px " :span="6" v-for="item in data.goodsList" :key="item.id">
+          <div class="card">
+            <img :src="item.img" alt="" style="width: 100%; height: 280px">
+            <div style="font-size: 18px;margin: 5px 0;color: #333">{{item.name}}</div>
+            <el-tooltip v-if="item.descr.length > 40" :content="item.descr" effect="light" placement="top">
+              <div class="line2" style="margin: 5px 0;color: #666;font-size: 14px;height: 40px">{{item.descr}}</div>
+            </el-tooltip>
+            <div v-else class="line2" style="margin: 5px 0;color: #666;font-size: 14px;height: 40px">{{item.descr}}</div>
+          <div  style="margin: 5px 0">
+            <el-tag type="success">{{item.specials}}</el-tag>
+          </div>
+            <div style="margin: 5px 0;display: flex;align-items: center;color: #666">
+            <div style="flex: 1">
+              <strong style="color: red;font-size: 18px">${{item.price}}</strong>/{{item.unit}}
+            </div>
+              <div style="flex: 1;text-align: center" >
+                Inventory:{{item.store}}
+              </div>
+              <div style="flex: 1">
+                <el-input-number @change="handleBuy(item)" v-model="item.num" style="width:120px " :min="0" :max="item.store"></el-input-number>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center ;justify-content: flex-end" v-if="item.num > 0">
+              total: <strong style="margin-right: 5px;display: inline-block;min-width: 50px;font-size:18px;color: red">${{item.total}}</strong>
+              <el-button type="primary" > purchase</el-button>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
+
+  <div style="padding: 50px 0; text-align: center; font-size: 24px; color: #888" v-else>There are no products available...</div>
+
+  </div>
+
 </template>
 
 
@@ -17,8 +58,13 @@ const data = reactive({
   pageSize: 10,
   total: 0,
   goodsList: [],
-  name: ''
+  name: '',
+  activeCategoryId: null // categoryId selected now
     })
+
+const handleBuy = (goods) =>{
+  goods.total =(goods.price * goods.num).toFixed(2)
+}
 
 
 //获取分类数据
@@ -32,15 +78,31 @@ const load = () => {
     params: {
       pageNum: data.pageNum,
       pageSize: data.pageSize,
-      name: data.name
+      name: data.name,
+      categoryId: data.activeCategoryId
     }
   }).then(res => {
-    data.tableData = res.data?.list
+    data.goodsList = res.data?.list
     data.total = res.data?.total
+    data.goodsList.forEach(item =>{
+      item.num =0
+    })
   })
 }
+
+
+const loadCategoryGoods = (categoryId) =>{
+  data.activeCategoryId = categoryId
+  load()
+}
+
+load()
 </script>
 
 <style >
 
+.active{
+  color: white !important;
+  background-color: #1967e3 !important;
+}
 </style>
