@@ -18,6 +18,7 @@ const router = createRouter({
         { path: 'goodsStock', component: () => import('@/views/manager/GoodsStock.vue')},
         { path: 'user', component: () => import('@/views/manager/User.vue')},
         { path: 'buy', component: () => import('@/views/manager/Buy.vue')},
+        { path: 'orders', component: () => import('@/views/manager/Orders.vue')},
       ]
     },
     { path: '/login', component: () => import('@/views/Login.vue')},

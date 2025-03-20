@@ -1,5 +1,6 @@
 <template>
   <div class="login-container">
+    <div style="color: #39bf23; font-size: 50px;font-weight: bold;position: absolute;text-align: center;top: 30px">Agricultural Sales System</div>
     <div class="login-box">
       <div style="font-weight: bold; font-size: 24px; text-align: center; margin-bottom: 30px; color: #1450aa">Welcome</div>
       <el-form :model="data.form"  ref="formRef" :rules="data.rules">

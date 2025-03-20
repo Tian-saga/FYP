@@ -97,6 +97,7 @@ import {ElMessageBox, ElMessage} from "element-plus";
 const uploadUrl = import.meta.env.VITE_BASE_URL + '/files/upload'
 
 const data = reactive({
+  user: JSON.parse(localStorage.getItem('system-user') || '{}'),
   pageNum: 1,
   pageSize: 10,
   total: 0,

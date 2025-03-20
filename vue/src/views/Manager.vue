@@ -26,9 +26,14 @@
             <span>HomePage</span>
           </el-menu-item>
 
-          <el-menu-item index="/buy"  v-if="data.user.role === 'USER'">
+          <el-menu-item index="/buy" v-if="data.user.role === 'USER'">
             <el-icon><Goods /></el-icon>
             <span>Purchase</span>
+          </el-menu-item>
+
+          <el-menu-item index="/orders"  >
+            <el-icon><Tickets /></el-icon>
+            <span>OrderMgmt</span>
           </el-menu-item>
 
           <el-sub-menu index="1" v-if="data.user.role === 'ADMIN'">

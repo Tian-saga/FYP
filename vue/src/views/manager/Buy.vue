@@ -1,6 +1,6 @@
 
 <template>
-  <div>
+  <div style="padding-bottom: 50px">
   <div class="card" style="margin-bottom: 10px">
     <el-button :class="{'active': data.activeCategoryId === null}" @click="loadCategoryGoods(null)">Display All</el-button>
     <el-button :class="{'active': data.activeCategoryId === item.id}" @click="loadCategoryGoods(item.id)" v-for="item in data.categoryList" :key="item.id">{{item.name}}</el-button>
@@ -35,13 +35,18 @@
             </div>
             <div style="display: flex; align-items: center ;justify-content: flex-end" v-if="item.num > 0">
               total: <strong style="margin-right: 5px;display: inline-block;min-width: 50px;font-size:18px;color: red">${{item.total}}</strong>
-              <el-button type="primary" > purchase</el-button>
+              <el-button type="primary" @click="buy(item)" > purchase</el-button>
             </div>
           </div>
         </el-col>
       </el-row>
 
   <div style="padding: 50px 0; text-align: center; font-size: 24px; color: #888" v-else>There are no products available...</div>
+
+    <div style="margin-top: 10px" v-if="data.total">
+      <el-pagination  layout="prev, pager, next" v-model:page-size="data.pageSize" v-model:current-page="data.pageNum" :total="data.total"/>
+    </div>
+
 
   </div>
 
@@ -51,8 +56,10 @@
 <script setup>
 import { reactive } from "vue";
 import request from "@/utils/request";
+import {ElMessage} from "element-plus";
 
 const data = reactive({
+  user: JSON.parse(localStorage.getItem('system-user') || '{}'),
   categoryList: [],
   pageNum: 1,
   pageSize: 10,
@@ -61,6 +68,22 @@ const data = reactive({
   name: '',
   activeCategoryId: null // categoryId selected now
     })
+
+
+
+const buy = (goods) => {
+  let orderData = {goodsId: goods.id, num: goods.num, userId: data.user.id}
+  request.post('/orders/add',orderData).then(res =>{
+    if(res.code === '200'){
+      ElMessage.success('Purchase Successfully')
+      goods.num = 0
+      goods.total = 0
+    }else{
+      ElMessage.error(res.msg)
+    }
+  })
+}
+
 
 const handleBuy = (goods) =>{
   goods.total =(goods.price * goods.num).toFixed(2)
