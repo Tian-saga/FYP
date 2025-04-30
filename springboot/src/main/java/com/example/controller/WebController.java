@@ -7,6 +7,7 @@ import com.example.service.AdminService;
 import com.example.service.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 
 @RestController
@@ -29,13 +30,20 @@ public class WebController {
      * 登录
      */
     @PostMapping("/login")
-    public Result login(@RequestBody Account account) {
-        Account ac = null;
+    public Result login(@RequestBody Account account,
+                        HttpServletRequest request) {           // ← 注入 Request
+        Account ac;
         if ("ADMIN".equals(account.getRole())) {
             ac = adminService.login(account);
         } else {
             ac = userService.login(account);
         }
+        if (ac == null) {
+            return Result.error("用户名或密码错误");
+        }
+        // —— 关键：把登录成功的用户存进 Session ——
+        request.getSession().setAttribute("user", ac);
+
         return Result.success(ac);
     }
 

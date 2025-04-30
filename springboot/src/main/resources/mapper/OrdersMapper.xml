@@ -10,6 +10,7 @@
         left join user on orders.user_id = user.id
         <where>
             <if test="orderNo != null"> and orders.order_no like concat('%', #{orderNo}, '%')</if>
+            <if test="userId != null"> and orders.user_id = #{userId}</if>
         </where>
         order by orders.id desc
     </select>

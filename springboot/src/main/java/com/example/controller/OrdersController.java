@@ -1,17 +1,20 @@
 package com.example.controller;
 
 import com.example.common.Result;
+import com.example.entity.Account;
 import com.example.entity.Orders;
+import com.example.entity.User;
 import com.example.service.OrdersService;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
- * 前端操作接口
- **/
+ * 订单相关的前端操作接口
+ */
 @RestController
 @RequestMapping("/orders")
 public class OrdersController {
@@ -20,7 +23,7 @@ public class OrdersController {
     private OrdersService ordersService;
 
     /**
-     * 新增
+     * 新增订单
      */
     @PostMapping("/add")
     public Result add(@RequestBody Orders orders) {
@@ -29,7 +32,7 @@ public class OrdersController {
     }
 
     /**
-     * 删除
+     * 根据 ID 删除订单
      */
     @DeleteMapping("/delete/{id}")
     public Result deleteById(@PathVariable Integer id) {
@@ -38,7 +41,7 @@ public class OrdersController {
     }
 
     /**
-     * 修改
+     * 根据 ID 修改订单
      */
     @PutMapping("/update")
     public Result updateById(@RequestBody Orders orders) {
@@ -47,16 +50,7 @@ public class OrdersController {
     }
 
     /**
-     * 根据ID查询
-     */
-    @GetMapping("/selectById/{id}")
-    public Result selectById(@PathVariable Integer id) {
-        Orders orders = ordersService.selectById(id);
-        return Result.success(orders);
-    }
-
-    /**
-     * 查询所有
+     * 查询所有订单（管理员使用）
      */
     @GetMapping("/selectAll")
     public Result selectAll(Orders orders) {
@@ -65,14 +59,22 @@ public class OrdersController {
     }
 
     /**
-     * 分页查询
+     * 分页查询当前登录用户的订单
      */
     @GetMapping("/selectPage")
     public Result selectPage(Orders orders,
-                             @RequestParam(defaultValue = "1") Integer pageNum,
-                             @RequestParam(defaultValue = "10") Integer pageSize) {
+                             @RequestParam(defaultValue = "1")  Integer pageNum,
+                             @RequestParam(defaultValue = "10") Integer pageSize,
+                             HttpServletRequest request) {
+        Account me = (Account) request.getSession().getAttribute("user");
+        if (me == null) {
+            return Result.error("Not logged in");
+        }
+        // 只有普通用户才强制加 userId 条件，管理员跳过，查所有
+        if (!"ADMIN".equals(me.getRole())) {
+            orders.setUserId(me.getId());
+        }
         PageInfo<Orders> page = ordersService.selectPage(orders, pageNum, pageSize);
         return Result.success(page);
     }
-
 }

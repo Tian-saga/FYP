@@ -36,15 +36,47 @@
 
         </el-table-column>
         <el-table-column label="OrderTime" prop="time"></el-table-column>
-        <el-table-column label="operate" width="160">
+        <el-table-column label="operate" width="200">
           <template #default="scope">
-            <el-button v-if="data.user.role === 'USER' && scope.row.status === 'Awaiting Payment'" size="small" type="primary" @click="changeStatus(scope.row,'Awaiting Shipment')">pay</el-button>
-            <el-button v-if="data.user.role === 'ADMIN' && scope.row.status === 'Awaiting Shipment'" size="small" type="primary" @click="changeStatus(scope.row,'Awaiting Receipt')">dispatch</el-button>
-            <el-button v-if="data.user.role === 'USER' && scope.row.status === 'Awaiting Receipt'" size="small" type="success" @click="changeStatus(scope.row,'Completed')">receive</el-button>
-            <el-button v-if="data.user.role === 'USER' && scope.row.status === 'Awaiting Payment'" size="small" type="danger" @click="changeStatus(scope.row,'cancelled')">cancel</el-button>
-            <el-button v-if="data.user.role === 'ADMIN'" size="small" type="danger" @click="handleDelete(scope.row.id)">delete</el-button>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <el-button
+                  v-if="data.user.role === 'USER' && scope.row.status === 'Awaiting Payment'"
+                  size="small"
+                  type="primary"
+                  @click="changeStatus(scope.row, 'Awaiting Shipment')"
+              >pay</el-button>
+
+              <el-button
+                  v-if="data.user.role === 'USER' && scope.row.status === 'Awaiting Payment'"
+                  size="small"
+                  type="danger"
+                  @click="changeStatus(scope.row, 'cancelled')"
+              >cancel</el-button>
+
+              <el-button
+                  v-if="data.user.role === 'USER' && scope.row.status === 'Awaiting Receipt'"
+                  size="small"
+                  type="success"
+                  @click="changeStatus(scope.row, 'Completed')"
+              >receive</el-button>
+
+              <el-button
+                  v-if="data.user.role === 'ADMIN' && scope.row.status === 'Awaiting Shipment'"
+                  size="small"
+                  type="primary"
+                  @click="changeStatus(scope.row, 'Awaiting Receipt')"
+              >dispatch</el-button>
+
+              <el-button
+                  v-if="data.user.role === 'ADMIN'"
+                  size="small"
+                  type="danger"
+                  @click="handleDelete(scope.row.id)"
+              >delete</el-button>
+            </div>
           </template>
         </el-table-column>
+
       </el-table>
     </div>
 
