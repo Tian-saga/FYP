@@ -37,7 +37,16 @@
     </div>
 
     <div class="card">
-      <el-pagination background layout="prev, pager, next" v-model:page-size="data.pageSize" v-model:current-page="data.pageNum" :total="data.total"/>
+      <el-pagination
+          background
+          layout="sizes, prev, pager, next, total"
+          :page-sizes="[5, 10, 20, 50]"
+          :current-page="data.pageNum"
+          :page-size="data.pageSize"
+          :total="data.total"
+          @current-change="onPageChange"
+          @size-change="onSizeChange"
+      />
     </div>
 
     <el-dialog title="Information" width="40%" v-model="data.formVisible" :close-on-click-modal="false" destroy-on-close>
@@ -79,8 +88,8 @@
 
 <script setup>
 import request from "@/utils/request";
-import {reactive} from "vue";
-import {ElMessageBox, ElMessage} from "element-plus";
+import { reactive, onMounted } from 'vue'
+import { ElMessageBox, ElMessage } from "element-plus";
 
 // 文件上传的接口地址
 const uploadUrl = import.meta.env.VITE_BASE_URL + '/files/upload'
@@ -95,33 +104,53 @@ const data = reactive({
   name: null
 })
 
-// 分页查询
-const load = () => {
+// —— 1) 分页查询 ——
+function load() {
   request.get('/user/selectPage', {
     params: {
-      pageNum: data.pageNum,
+      pageNum:  data.pageNum,
       pageSize: data.pageSize,
-      name: data.name
+      name:     data.name
     }
   }).then(res => {
-    data.tableData = res.data?.list
-    data.total = res.data?.total
+    data.tableData = res.data.list
+    data.total     = res.data.total
   })
 }
 
-// 新增
+// —— 2) 组件挂载和搜索时都拉一次 ——
+onMounted(load)
+
+// —— 3) 页码变化回调 ——
+function onPageChange(newPage) {
+  data.pageNum = newPage
+  load()
+}
+
+// —— 4) 每页条数变化回调 ——
+function onSizeChange(newSize) {
+  data.pageSize = newSize
+  data.pageNum  = 1     // 回到第一页
+  load()
+}
+
+// —— 搜索 & 重置 ——
+function reset() {
+  data.name = null
+  load()
+}
+
+// —— 新增 / 编辑 / 删除 / 保存 ——
 const handleAdd = () => {
   data.form = {}
   data.formVisible = true
 }
 
-// 编辑
 const handleEdit = (row) => {
-  data.form = JSON.parse(JSON.stringify(row))
+  data.form = { ...row }
   data.formVisible = true
 }
 
-// 新增保存
 const add = () => {
   request.post('/user/add', data.form).then(res => {
     if (res.code === '200') {
@@ -134,7 +163,6 @@ const add = () => {
   })
 }
 
-// 编辑保存
 const update = () => {
   request.put('/user/update', data.form).then(res => {
     if (res.code === '200') {
@@ -147,15 +175,16 @@ const update = () => {
   })
 }
 
-// 弹窗保存
 const save = () => {
-  // data.form有id就是更新，没有就是新增
   data.form.id ? update() : add()
 }
 
-// 删除
 const handleDelete = (id) => {
-  ElMessageBox.confirm('The data cannot be recovered after deletion, are you sure to delete it?', 'Delete confirmation', { type: 'warning' }).then(res => {
+  ElMessageBox.confirm(
+      'The data cannot be recovered after deletion, are you sure to delete it?',
+      'Delete confirmation',
+      { type: 'warning' }
+  ).then(() => {
     request.delete('/user/delete/' + id).then(res => {
       if (res.code === '200') {
         load()
@@ -164,19 +193,10 @@ const handleDelete = (id) => {
         ElMessage.error(res.msg)
       }
     })
-  }).catch(err => {})
+  }).catch(() => {})
 }
 
-// 重置
-const reset = () => {
-  data.name = null
-  load()
-}
-
-// 处理文件上传的钩子
 const handleImgSuccess = (res) => {
-  data.form.avatar = res.data  // res.data就是文件上传返回的文件路径，获取到路径后赋值表单的属性
+  data.form.avatar = res.data
 }
-
-load()
 </script>

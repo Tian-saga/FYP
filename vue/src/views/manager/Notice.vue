@@ -11,7 +11,7 @@
       <div style="margin-bottom: 10px">
         <el-button type="primary" @click="handleAdd">Add</el-button>
       </div>
-      <el-table :data="data.tableData" stripe>
+      <el-table :data="data.noticeList" stripe>
         <el-table-column label="title" prop="title"></el-table-column>
         <el-table-column label="content" prop="content"></el-table-column>
         <el-table-column label="time" prop="time"></el-table-column>
@@ -22,6 +22,21 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <div style="margin-top:20px; text-align:right">
+         <el-pagination
+              background
+              layout="sizes, prev, pager, next, total"
+              :page-sizes="[5,10,20,50]"
+              :current-page="data.pageNum"
+              :page-size="data.pageSize"
+              :total="data.total"
+              @current-change="onPageChange"
+              @size-change="onSizeChange"
+           />
+        </div>
+
+
     </div>
 
     <div class="card" v-if="data.total">
@@ -50,104 +65,109 @@
 
 <script setup>
 import request from "@/utils/request";
-import {reactive} from "vue";
-import {ElMessageBox, ElMessage} from "element-plus";
-
-// 文件上传的接口地址
-const uploadUrl = import.meta.env.VITE_BASE_URL + '/files/upload'
+import { reactive, onMounted } from "vue";
+import { ElMessageBox, ElMessage } from "element-plus";
 
 const data = reactive({
-  pageNum: 1,
-  pageSize: 10,
-  total: 0,
+  noticeList: [],   // 可以继续叫 tableData，也可以叫 noticeList
+  pageNum:     1,
+  pageSize:   10,
+  total:      0,
+  title:      null,
   formVisible: false,
-  form: {},
-  tableData: [],
-  title: null
-})
+  form:        {}
+});
 
-// 分页查询
-const load = () => {
+// —— 1. 统一的 load() 函数 ——
+function load() {
   request.get('/notice/selectPage', {
     params: {
-      pageNum: data.pageNum,
+      pageNum:  data.pageNum,
       pageSize: data.pageSize,
-      title: data.title
+      title:    data.title
     }
   }).then(res => {
-    data.tableData = res.data?.list
-    data.total = res.data?.total
-  })
+    data.noticeList = res.data.list;
+    data.total      = res.data.total;
+  });
 }
 
-// 新增
-const handleAdd = () => {
-  data.form = {}
-  data.formVisible = true
+// —— 2. 自动拉第一页 & 分页回调 ——
+onMounted(() => {
+  load();
+});
+
+function onPageChange(newPage) {
+  data.pageNum = newPage;
+  load();
 }
 
-// 编辑
-const handleEdit = (row) => {
-  data.form = JSON.parse(JSON.stringify(row))
-  data.formVisible = true
+function onSizeChange(newSize) {
+  data.pageSize = newSize;
+  data.pageNum  = 1;
+  load();
 }
 
-// 新增保存
-const add = () => {
+// —— 3. 保留你原来的 reset ——
+function reset() {
+  data.title = null;
+  data.pageNum = 1;
+  load();
+}
+
+// —— 4. 保留你原来的新增/编辑/保存/删除 ——
+function handleAdd() {
+  data.form = {};
+  data.formVisible = true;
+}
+
+function handleEdit(row) {
+  data.form = JSON.parse(JSON.stringify(row));
+  data.formVisible = true;
+}
+
+function add() {
   request.post('/notice/add', data.form).then(res => {
     if (res.code === '200') {
-      load()
-      ElMessage.success('Operate Successfully')
-      data.formVisible = false
+      load();
+      ElMessage.success('Operate Successfully');
+      data.formVisible = false;
     } else {
-      ElMessage.error(res.msg)
+      ElMessage.error(res.msg);
     }
-  })
+  });
 }
 
-// 编辑保存
-const update = () => {
+function update() {
   request.put('/notice/update', data.form).then(res => {
     if (res.code === '200') {
-      load()
-      ElMessage.success('Operate Successfully')
-      data.formVisible = false
+      load();
+      ElMessage.success('Operate Successfully');
+      data.formVisible = false;
     } else {
-      ElMessage.error(res.msg)
+      ElMessage.error(res.msg);
     }
-  })
+  });
 }
 
-// 弹窗保存
-const save = () => {
-  // data.form有id就是更新，没有就是新增
-  data.form.id ? update() : add()
+function save() {
+  data.form.id ? update() : add();
 }
 
-// 删除
-const handleDelete = (id) => {
-  ElMessageBox.confirm('The data cannot be recovered after deletion, are you sure to delete it?', 'Delete confirmation', { type: 'warning' }).then(res => {
+function handleDelete(id) {
+  ElMessageBox.confirm(
+      'The data cannot be recovered after deletion, are you sure to delete it?',
+      'Delete confirmation',
+      { type: 'warning' }
+  ).then(() => {
     request.delete('/notice/delete/' + id).then(res => {
       if (res.code === '200') {
-        load()
-        ElMessage.success('Operate Successfully')
+        load();
+        ElMessage.success('Operate Successfully');
       } else {
-        ElMessage.error(res.msg)
+        ElMessage.error(res.msg);
       }
-    })
-  }).catch(err => {})
+    });
+  });
 }
-
-// 重置
-const reset = () => {
-  data.title = null
-  load()
-}
-
-// 处理文件上传的钩子
-const handleImgSuccess = (res) => {
-  data.form.avatar = res.data  // res.data就是文件上传返回的文件路径，获取到路径后赋值表单的属性
-}
-
-load()
 </script>

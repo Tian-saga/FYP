@@ -3,8 +3,8 @@
 
     <div class="card" style="margin-bottom: 5px;">
       <el-input v-model="data.goodsName" style="width: 300px; margin-right: 10px" placeholder="Please enter a goodsName to enquire"></el-input>
-      <el-button type="primary" @click="load">Inquire</el-button>
-      <el-button type="info" style="margin: 0 10px" @click="reset">Reset</el-button>
+      <el-button type="primary" @click="onSearch">Inquire</el-button>
+      <el-button type="info" style="margin: 0 10px" @click="onReset">Reset</el-button>
     </div>
 
     <div class="card" style="margin-bottom: 5px">
@@ -27,7 +27,16 @@
     </div>
 
     <div class="card" v-if="data.total">
-      <el-pagination background layout="prev, pager, next" v-model:page-size="data.pageSize" v-model:current-page="data.pageNum" :total="data.total"/>
+      <el-pagination
+          background
+          layout="sizes, prev, pager, next, total"
+          :page-sizes="[5,10,20,50]"
+          :current-page="data.pageNum"
+          :page-size="data.pageSize"
+          :total="data.total"
+          @current-change="onPageChange"
+          @size-change="onSizeChange"
+      />
     </div>
 
     <el-dialog title="IncomingInfo" width="40%" v-model="data.formVisible" :close-on-click-modal="false" destroy-on-close>
@@ -72,7 +81,7 @@
 
 <script setup>
 import request from "@/utils/request";
-import {reactive} from "vue";
+import { reactive, onMounted } from 'vue'
 import {ElMessageBox, ElMessage} from "element-plus";
 
 // 文件上传的接口地址
@@ -107,6 +116,38 @@ const load = () => {
     data.total = res.data?.total
   })
 }
+
+// ① 组件挂载后，自动拉一次数据
+onMounted(() => {
+  load()
+})
+
+// ② 页码切换时
+function onPageChange(newPage) {
+  data.pageNum = newPage
+  load()
+}
+
+// ③ 每页大小切换时
+function onSizeChange(newSize) {
+  data.pageSize = newSize
+  data.pageNum  = 1
+  load()
+}
+
+// ④ 点击“搜索”按钮时
+function onSearch() {
+  data.pageNum = 1
+  load()
+}
+
+// ⑤ （可选）“重置”按钮时
+function onReset() {
+  data.name    = ''     // 或 null，取决于你的字段
+  data.pageNum = 1
+  load()
+}
+
 
 // 新增
 const handleAdd = () => {

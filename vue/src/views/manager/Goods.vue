@@ -3,8 +3,8 @@
 
     <div class="card" style="margin-bottom: 5px;">
       <el-input v-model="data.name" style="width: 300px; margin-right: 10px" placeholder="Please enter a name to enquire"></el-input>
-      <el-button type="primary" @click="load">Inquire</el-button>
-      <el-button type="info" style="margin: 0 10px" @click="reset">Reset</el-button>
+      <el-button type="primary" @click="onSearch">Inquire</el-button>
+      <el-button type="info" style="margin: 0 10px" @click="onReset">Reset</el-button>
     </div>
 
     <div class="card" style="margin-bottom: 5px">
@@ -37,7 +37,15 @@
     </div>
 
     <div class="card" v-if="data.total">
-      <el-pagination background layout="prev, pager, next" v-model:page-size="data.pageSize" v-model:current-page="data.pageNum" :total="data.total"/>
+      <el-pagination
+          background
+          :current-page="data.pageNum"
+          :page-size="data.pageSize"
+          :total="data.total"
+          layout="sizes, prev, pager, next, total"
+          :page-sizes="[8,16,20]"
+          @current-change="onPageChange"
+          @size-change="onSizeChange"/>
     </div>
 
     <el-dialog title="ProductInfo" width="40%" v-model="data.formVisible" :close-on-click-modal="false" destroy-on-close>
@@ -90,8 +98,10 @@
 
 <script setup>
 import request from "@/utils/request";
-import {reactive} from "vue";
-import {ElMessageBox, ElMessage} from "element-plus";
+import { reactive, onMounted } from "vue";
+import { ElMessageBox, ElMessage } from "element-plus";
+
+
 
 // 文件上传的接口地址
 const uploadUrl = import.meta.env.VITE_BASE_URL + '/files/upload'
@@ -99,7 +109,7 @@ const uploadUrl = import.meta.env.VITE_BASE_URL + '/files/upload'
 const data = reactive({
   user: JSON.parse(localStorage.getItem('system-user') || '{}'),
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 8,
   total: 0,
   formVisible: false,
   form: {},
@@ -125,6 +135,36 @@ const load = () => {
     data.total = res.data?.total
   })
 }
+
+// ① 组件挂载后，自动拉一次第一页
+onMounted(() => {
+  load()
+})
+
+// ② 页码 改变时
+function onPageChange(newPage) {
+  data.pageNum = newPage
+  load()
+}
+// ③ 每页大小 改变时
+function onSizeChange(newSize) {
+  data.pageSize = newSize
+  data.pageNum  = 1
+  load()
+}
+
+// ④ 搜索按钮点击
+function onSearch() {
+  data.pageNum = 1
+  load()
+}
+// ⑤ 重置按钮点击
+function onReset() {
+  data.name    = null
+  data.pageNum = 1
+  load()
+}
+
 
 // 新增
 const handleAdd = () => {

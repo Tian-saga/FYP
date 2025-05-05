@@ -3,7 +3,7 @@
 
     <div class="card" style="margin-bottom: 5px;">
       <el-input v-model="data.name" style="width: 300px; margin-right: 10px" placeholder="Please enter a name to enquire"></el-input>
-      <el-button type="primary" @click="load">Inquire</el-button>
+      <el-button type="primary" @click="loadAdmins">Inquire</el-button>
       <el-button type="info" style="margin: 0 10px" @click="reset">Reset</el-button>
     </div>
 
@@ -34,7 +34,16 @@
     </div>
 
     <div class="card">
-      <el-pagination background layout="prev, pager, next" v-model:page-size="data.pageSize" v-model:current-page="data.pageNum" :total="data.total"/>
+      <el-pagination
+          background
+          layout="sizes, prev, pager, next, total"
+          :page-sizes="[5, 10, 20, 50]"
+          :current-page="data.pageNum"
+          :page-size="data.pageSize"
+          :total="data.total"
+          @current-change="onPageChange"
+          @size-change="onSizeChange"
+      />
     </div>
 
     <el-dialog title="Information" width="40%" v-model="data.formVisible" :close-on-click-modal="false" destroy-on-close>
@@ -63,55 +72,84 @@
 </template>
 
 <script setup>
-import request from "@/utils/request";
-import {reactive} from "vue";
-import {ElMessageBox, ElMessage} from "element-plus";
+import { reactive, onMounted } from 'vue'
+import request from '@/utils/request'
+import { ElMessageBox, ElMessage } from 'element-plus'
 
-// 文件上传的接口地址
+// 文件上传的接口（如果有上传）
 const uploadUrl = import.meta.env.VITE_BASE_URL + '/files/upload'
 
 const data = reactive({
-  pageNum: 1,
-  pageSize: 10,
-  total: 0,
+  // 搜索框要搜 username
+  username:    null,
+
+  // 分页
+  pageNum:     1,
+  pageSize:    10,
+  total:       0,
+
+  // 表格和弹窗
+  tableData:   [],
   formVisible: false,
-  form: {},
-  tableData: [],
-  name: null
+  form:        {}
 })
 
-// 分页查询
-const load = () => {
+// —— 1) 拉第一页 / 搜索 & 翻页 & 改页大小 都用同一个方法 ——
+function loadAdmins() {
   request.get('/admin/selectPage', {
     params: {
-      pageNum: data.pageNum,
+      pageNum:  data.pageNum,
       pageSize: data.pageSize,
-      name: data.name
+      username: data.username
     }
   }).then(res => {
-    data.tableData = res.data?.list
-    data.total = res.data?.total
+    data.tableData = res.data.list
+    data.total     = res.data.total
   })
 }
 
-// 新增
-const handleAdd = () => {
+// 初始挂载和搜索按钮都调用它
+onMounted(loadAdmins)
+
+// 翻页回调
+function onPageChange(newPage) {
+  data.pageNum = newPage
+  loadAdmins()
+}
+
+// 修改每页大小的回调
+function onSizeChange(newSize) {
+  data.pageSize = newSize
+  data.pageNum  = 1      // 回第一页
+  loadAdmins()
+}
+
+// 搜索框右边的 “Reset” 按钮
+function reset() {
+  data.username = null
+  loadAdmins()
+}
+
+// —— 弹窗相关：Add / Edit / Save / Delete ——
+
+// 点击 “Add”
+function handleAdd() {
   data.form = {}
   data.formVisible = true
 }
 
-// 编辑
-const handleEdit = (row) => {
-  data.form = JSON.parse(JSON.stringify(row))
+// 点击 “Edit”
+function handleEdit(row) {
+  data.form = { ...row }
   data.formVisible = true
 }
 
 // 新增保存
-const add = () => {
+function add() {
   request.post('/admin/add', data.form).then(res => {
     if (res.code === '200') {
-      load()
-      ElMessage.success('Operate Successfully')
+      loadAdmins()
+      ElMessage.success('Added!')
       data.formVisible = false
     } else {
       ElMessage.error(res.msg)
@@ -120,11 +158,11 @@ const add = () => {
 }
 
 // 编辑保存
-const update = () => {
+function update() {
   request.put('/admin/update', data.form).then(res => {
     if (res.code === '200') {
-      load()
-      ElMessage.success('Operate Successfully')
+      loadAdmins()
+      ElMessage.success('Updated!')
       data.formVisible = false
     } else {
       ElMessage.error(res.msg)
@@ -132,36 +170,32 @@ const update = () => {
   })
 }
 
-// 弹窗保存
-const save = () => {
-  // data.form有id就是更新，没有就是新增
+// 弹窗的 “Save” 按钮
+function save() {
   data.form.id ? update() : add()
 }
 
 // 删除
-const handleDelete = (id) => {
-  ElMessageBox.confirm('The data cannot be recovered after deletion, are you sure to delete it?', 'Delete confirmation', { type: 'warning' }).then(res => {
-    request.delete('/admin/delete/' + id).then(res => {
+function handleDelete(id) {
+  ElMessageBox.confirm(
+      'This cannot be undone. Delete anyway?',
+      'Warning',
+      { type: 'warning' }
+  ).then(() => {
+    request.delete(`/admin/delete/${id}`).then(res => {
       if (res.code === '200') {
-        load()
-        ElMessage.success('Operate Successfully')
+        loadAdmins()
+        ElMessage.success('Deleted!')
       } else {
         ElMessage.error(res.msg)
       }
     })
-  }).catch(err => {})
+  })
 }
 
-// 重置
-const reset = () => {
-  data.name = null
-  load()
+// 弹窗的 “Cancel” 按钮
+function resetForm() {
+  data.form = {}
+  data.formVisible = false
 }
-
-// 处理文件上传的钩子
-const handleImgSuccess = (res) => {
-  data.form.avatar = res.data  // res.data就是文件上传返回的文件路径，获取到路径后赋值表单的属性
-}
-
-load()
 </script>

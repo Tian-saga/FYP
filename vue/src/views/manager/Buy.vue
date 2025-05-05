@@ -7,7 +7,8 @@
   </div>
  <div style="margin-bottom: 10px">
     <el-input size="large" style="width: 300px;margin-right: 5px" v-model="data.name" placeholder="Please enter a keyword to search"></el-input>
-    <el-button type="primary">Search</el-button>
+    <el-button type="primary" @click="onSearch">Search</el-button>
+   <el-button @click="onReset" style="margin-left:8px">Reset</el-button>
  </div>
 
     <el-row :gutter="10" v-if="data.total > 0">
@@ -44,7 +45,16 @@
   <div style="padding: 50px 0; text-align: center; font-size: 24px; color: #888" v-else>There are no products available...</div>
 
     <div style="margin-top: 10px" v-if="data.total">
-      <el-pagination  layout="prev, pager, next" v-model:page-size="data.pageSize" v-model:current-page="data.pageNum" :total="data.total"/>
+      <el-pagination
+          background
+          layout="sizes, prev, pager, next, total"
+          :page-sizes="[4,8,12,20]"
+          :current-page="data.pageNum"
+          :page-size="data.pageSize"
+          :total="data.total"
+          @current-change="onPageChange"
+          @size-change="onSizeChange"
+      />
     </div>
 
 
@@ -54,7 +64,7 @@
 
 
 <script setup>
-import { reactive } from "vue";
+import { reactive, onMounted } from "vue";
 import request from "@/utils/request";
 import {ElMessage} from "element-plus";
 
@@ -111,6 +121,37 @@ const load = () => {
       item.num =0
     })
   })
+}
+
+// 组件挂载后，自动加载一次
+onMounted(() => {
+  load()
+})
+
+// 当页码发生变化时调用
+function onPageChange(newPage) {
+  data.pageNum = newPage
+  load()
+}
+
+// 当每页条数发生变化时调用
+function onSizeChange(newSize) {
+  data.pageSize = newSize
+  data.pageNum  = 1      // 一般切条数会回第一页
+  load()
+}
+
+// 点击 Search 按钮搜索
+function onSearch() {
+  data.pageNum = 1
+  load()
+}
+
+// （可选）如果想加一个 Reset 按钮来清空关键词
+function onReset() {
+  data.name    = ''      // 或 null，都可
+  data.pageNum = 1
+  load()
 }
 
 
